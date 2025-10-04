@@ -53,6 +53,9 @@ const ExpenseRequestSchema = new mongoose.Schema({
     enum: ['Draft', 'Pending', 'Approved', 'Rejected'],
   },
   approvers: [ApproverStatusSchema],
+  receiptImageUrl: {
+    type: String,
+  },
 }, {
   timestamps: true,
   toJSON: {

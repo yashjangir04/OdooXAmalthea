@@ -4,12 +4,10 @@ import { COUNTRIES } from '../constants';
 const API_BASE_URL = 'http://localhost:5000/api';
 
 // --- Helper for API calls ---
-// Fix: Loosen the type of `options.body` to `any` to allow passing plain objects, which are then stringified.
 const apiFetch = async (url: string, options: Omit<RequestInit, 'body'> & { body?: any } = {}) => {
-  // By default, send credentials (cookies) with each request
   options.credentials = 'include';
   
-  if (options.body && typeof options.body === 'object') {
+  if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' };
     options.body = JSON.stringify(options.body);
   }
@@ -90,10 +88,21 @@ export const saveApprovalWorkflowForUser = async (userId: string, workflow: Appr
     });
 }
 
-export const createExpenseRequest = async (request: Omit<ExpenseRequest, 'id' | 'createdAt' | 'approvers'>): Promise<ExpenseRequest> => {
+export const createExpenseRequest = async (request: Omit<ExpenseRequest, 'id' | 'createdAt' | 'approvers' | 'receiptImageUrl'>, receiptImage: File | null): Promise<ExpenseRequest> => {
+    const formData = new FormData();
+
+    // FormData can only append strings or Blobs (Files are Blobs)
+    Object.entries(request).forEach(([key, value]) => {
+        formData.append(key, String(value));
+    });
+
+    if (receiptImage) {
+        formData.append('receiptImage', receiptImage, receiptImage.name);
+    }
+
     return apiFetch('/expenses', {
         method: 'POST',
-        body: request,
+        body: formData, // pass FormData directly
     });
 };
 

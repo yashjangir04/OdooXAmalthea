@@ -1,10 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const User = require('../models/UserModel');
 const ExpenseRequest = require('../models/ExpenseRequestModel');
 const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() }); // Use memory storage for simplicity
 
 // --- AUTH ROUTES ---
 
@@ -233,13 +235,22 @@ router.get('/expenses/queue', async (req, res) => {
 
 
 // POST /api/expenses
-router.post('/expenses', async (req, res) => {
+router.post('/expenses', upload.single('receiptImage'), async (req, res) => {
     const { userId, ...rest } = req.body;
     try {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: "User not found" });
 
         const newRequestData = { userId, ...rest };
+        
+        // As we are using multer, number values come in as strings
+        newRequestData.amount = Number(newRequestData.amount);
+
+        if (req.file) {
+            // We are not saving the file, but we record that it was uploaded.
+            newRequestData.receiptImageUrl = req.file.originalname;
+        }
+
         if (newRequestData.status === 'Pending') {
             newRequestData.approvers = user.workflow.approvers.map(approverId => ({
                 userId: approverId,

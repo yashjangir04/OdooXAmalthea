@@ -42,6 +42,7 @@ export interface ExpenseRequest {
   status: ApprovalStatus;
   createdAt: string;
   approvers: { userId: string, status: 'Pending' | 'Approved' | 'Rejected' }[];
+  receiptImageUrl?: string;
 }
 
 export interface ApprovalWorkflow {
