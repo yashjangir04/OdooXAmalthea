@@ -1,0 +1,5 @@
+{
+  "name": "Expense Approval System",
+  "description": "A comprehensive MERN-stack-like application for managing expense approval workflows. This application features distinct roles for admins and users, allowing for user management, dynamic approval chain creation, and expense submission and processing.",
+  "requestFramePermissions": []
+}
